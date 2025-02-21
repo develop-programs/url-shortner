@@ -1,0 +1,32 @@
+{
+  "name": "url_shortner",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "build:css": "tailwindcss -i ./src/styles/input.css -o ./public/styles/output.css --watch"
+  },
+  "keywords": [
+    "url",
+    "shortner"
+  ],
+  "author": "Shryansh Awadhiya",
+  "license": "ISC",
+  "description": "A URL shortner API",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "mongoose": "^8.10.1",
+    "nodemon": "^3.1.9",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35"
+  }
+}

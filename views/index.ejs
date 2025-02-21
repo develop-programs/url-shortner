@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link href="/styles/output.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
+            <%= title %>
+        </h1>
+        <p class="text-center text-gray-600 mb-6">Welcome to the URL Shortener</p>
+        <form id="urlForm" class="space-y-4">
+            <input type="url" name="url" placeholder="Enter URL" required
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" id="submitBtn"
+                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200">
+                Shorten
+            </button>
+        </form>
+        <div id="errorContainer" class="mt-4 hidden">
+            <p class="text-red-500" id="errorMessage"></p>
+        </div>
+        <div id="shortUrlContainer" class="mt-6 hidden bg-blue-50 p-4 rounded-lg">
+            <p class="text-gray-700 font-semibold mb-2">Your shortened URL:</p>
+            <div class="flex items-center space-x-2">
+                <a id="shortUrlLink" class="text-blue-500 hover:text-blue-600 break-all flex-1" target="_blank"></a>
+                <button onclick="copyToClipboard()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                    Copy URL
+                </button>
+            </div>
+        </div>
+
+        <div id="existingUrlsContainer" class="mt-8 border-t pt-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent URLs</h2>
+            <div id="urlsList" class="space-y-4">
+                <!-- URLs will be populated here -->
+            </div>
+        </div>
+
+        <script>
+            async function copyToClipboard ()
+            {
+                const link = document.getElementById('shortUrlLink').href;
+                await navigator.clipboard.writeText(link);
+                alert('URL copied to clipboard!');
+            }
+
+            async function fetchExistingUrls ()
+            {
+                try
+                {
+                    const response = await fetch('/api/data');
+                    if (!response.ok)
+                    {
+                        throw new Error('Failed to fetch URLs');
+                    }
+                    const urls = await response.json();
+                    const urlsList = document.getElementById('urlsList');
+
+                    if (urls.length === 0)
+                    {
+                        urlsList.innerHTML = '<p class="text-gray-500 text-center py-4">No URLs shortened yet</p>';
+                        return;
+                    }
+
+                    urlsList.innerHTML = urls.map(url => `
+                        <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <a href="${url.shortUrl}" 
+                                           class="text-blue-500 hover:text-blue-600 font-medium truncate"
+                                           target="_blank">
+                                            ${url.shortUrl}
+                                        </a>
+                                        <button onclick="navigator.clipboard.writeText('${url.shortUrl}')"
+                                                class="shrink-0 text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+                                                title="Copy shortened URL">
+                                            Copy
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="truncate" title="${url.originalUrl}">
+                                            Original: ${url.originalUrl}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error)
+                {
+                    console.error('Error fetching URLs:', error);
+                    document.getElementById('urlsList').innerHTML =
+                        '<p class="text-red-500 text-center py-4">Failed to load existing URLs</p>';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', fetchExistingUrls);
+
+            document.getElementById('urlForm').addEventListener('submit', async (e) =>
+            {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submitBtn');
+                const errorContainer = document.getElementById('errorContainer');
+                const errorMessage = document.getElementById('errorMessage');
+                const urlInput = document.querySelector('input[name="url"]');
+
+                try
+                {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Shortening...';
+                    errorContainer.classList.add('hidden');
+
+                    const response = await fetch('/api/shorten', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: urlInput.value })
+                    });
+
+                    if (!response.ok)
+                    {
+                        throw new Error('Failed to shorten URL');
+                    }
+
+                    const data = await response.json();
+                    const container = document.getElementById('shortUrlContainer');
+                    const link = document.getElementById('shortUrlLink');
+                    link.href = data.shortUrl;
+                    link.textContent = data.shortUrl;
+                    container.classList.remove('hidden');
+
+                    await fetchExistingUrls(); // Refresh the URLs list
+                } catch (error)
+                {
+                    errorMessage.textContent = error.message;
+                    errorContainer.classList.remove('hidden');
+                } finally
+                {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Shorten';
+                }
+            });
+        </script>
+    </div>
+</body>
+
+</html>
