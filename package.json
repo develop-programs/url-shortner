@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "build:css": "tailwindcss -i ./src/styles/input.css -o ./public/styles/output.css --watch"
+    "build:css": "tailwindcss -i ./src/styles/input.css -o ./public/styles/output.css --watch",
+    "postinstall": "postcss ./public/styles/output.css -o ./public/styles/output.css --use autoprefixer"
   },
   "keywords": [
     "url",
