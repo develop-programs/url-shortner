@@ -1,24 +1,32 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const urlSchema = new mongoose.Schema(
-  {
-    originalUrl: {
-      type: String,
-      required: true,
-    },
-    redirectURL: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    visited: [
-      {
-        type: Date,
-        default: Date,
-      },
-    ],
+const urlSchema = new mongoose.Schema({
+  urlCode: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
   },
-  { timestamps: true }
-);
+  longUrl: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  shortUrl: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  clicks: {
+    type: Number,
+    default: 0
+  }
+});
 
-export default mongoose.model("Url", urlSchema);
+const Url = mongoose.model('Url', urlSchema);
+
+export default Url;

@@ -1,0 +1,14 @@
+{
+  "name": "url-shortener",
+  "type": "web",
+  "env": [
+    "MONGODB_URI"
+  ],
+  "domains": [
+    "${APP_NAME}.vessel.app"
+  ],
+  "port": 3000,
+  "build": {
+    "dockerfile": "./Dockerfile"
+  }
+}

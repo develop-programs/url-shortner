@@ -1,8 +1,11 @@
 import Express from "express";
 import Url from "../models/url.model.js";
 import crypto from "crypto";
+import { Router } from 'express';
+import { shortenUrl, getAllUrls } from '../controllers/shortner.controller.js';
 
 const shortRoutes = Express.Router();
+const router = Router();
 
 shortRoutes.get("/data", async (_, res) => {
   try {
@@ -73,5 +76,11 @@ shortRoutes.get("/:code", async (req, res) => {
     res.status(500).render("error", { message: "Server error" });
   }
 });
+
+// Route to shorten a URL
+router.post('/shorten', shortenUrl);
+
+// Route to get all URLs
+router.get('/urls', getAllUrls);
 
 export default shortRoutes;

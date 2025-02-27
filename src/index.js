@@ -4,6 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/config.js";
 import shortRoutes from "./routes/shortner.routes.js";
+import { redirectUrl } from "./controllers/shortner.controller.js";
+import serverless from "serverless-http";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,11 +29,18 @@ app.get("/", (req, res) => {
   res.render("index", { title: "URL Shortener" });
 });
 
+// API routes
 app.use("/api", shortRoutes);
+
+// Redirect route
+app.get("/:code", redirectUrl);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Export for serverless functions
+export const handler = serverless(app);
 
 export default app;
